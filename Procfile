@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath './firedash' index:server
+web: gunicorn --pythonpath './firedash' index:app.server
