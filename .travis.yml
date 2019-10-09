@@ -19,5 +19,5 @@ script:
 
 deploy:
   provider: heroku
-  api_key: ...
+  api_key: $HEROKU_API_KEY
   app: my-app-123
