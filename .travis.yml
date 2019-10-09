@@ -1,0 +1,23 @@
+language: python
+
+install:
+  - sudo apt-get update
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - source "$HOME/miniconda/etc/profile.d/conda.sh"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # Replace dep1 dep2 ... with your dependencies
+  - conda create -q -n fire-test python=3.7 flake8
+  - conda activate fire-test
+
+script:
+  - python -m flake8
+
+deploy:
+  provider: heroku
+  api_key: ...
+  app: my-app-123
