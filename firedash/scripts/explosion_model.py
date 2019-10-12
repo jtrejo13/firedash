@@ -1,13 +1,10 @@
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import cantera as ct
 
 RR = 8.314
-
 Patm = 101.3E+3
-
 Patmpsi = Patm * 0.000145038
 
 
@@ -15,7 +12,7 @@ def psi(P_):
     return (P_ * Patmpsi - Patmpsi)
 
 
-class inp():
+class Input():
     def __init__(self, *args, **kwargs):
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -24,7 +21,7 @@ class inp():
         [print(f" {k}  \t \t  {v}") for k, v in self.__dict__.items()]
 
 
-class explosion():
+class Explosion():
     def __init__(self, *args, **kwargs):
         for k, v in kwargs.items():
             for kk, vv in v.__dict__.items():
@@ -49,7 +46,7 @@ class explosion():
         T = self.T  # Initial unburned gas temperature K
         P1 = Patm  # Initial Pressure
         Pa = Patm  # Exit pressure outside vent
-        Tu = T  # Unburned gas temperature
+        # Tu = T  # Unburned gas temperature
         T1 = T  # Initial Temperature
 
         # Geometry and Vent
@@ -64,9 +61,12 @@ class explosion():
 
         # Create Gases
         carbon = ct.Solution('graphite.xml')
-        gas_b = ct.Solution('gri30.xml', 'gri30_mix')  # Calls Gas Properties from Gri-MECH
-        gas_bv = ct.Solution('gri30.xml', 'gri30_mix')  # Calls Gas Properties from Gri-MECH
-        gas_u = ct.Solution('gri30.xml', 'gri30_mix')  # Calls Gas Properties from Gri-MECH
+        # Calls Gas Properties from Gri-MECH
+        gas_b = ct.Solution('gri30.xml', 'gri30_mix')
+        # Calls Gas Properties from Gri-MECH
+        gas_bv = ct.Solution('gri30.xml', 'gri30_mix')
+        # Calls Gas Properties from Gri-MECH
+        gas_u = ct.Solution('gri30.xml', 'gri30_mix')
         mix_phases_b = [(gas_b, 1.0), (carbon, 0.0)]  # Burned Mixture
         mix_phases_u = [(gas_u, 1.0), (carbon, 0.0)]  # Unburned Mixture
 
@@ -77,32 +77,35 @@ class explosion():
         gas_bv.TP = T, Patm
         gas_u.TP = T, Patm
 
-        unburned = ct.Mixture(mix_phases_u)  #
-        burned = ct.Mixture(mix_phases_b)  #
+        unburned = ct.Mixture(mix_phases_u)  # noqa
+        burned = ct.Mixture(mix_phases_b)
 
-        # Calculate Laminar Flamespeed
-        #        CalcFlamespeed = False
-        #        if CalcFlamespeed:
-        #            f = ct.FreeFlame(unburned, width=5) #A freely-propagating flat flame
-        #            # Energy equation enabled
-        #            f.energy_enabled = True
-        #            f.set_max_time_step(1000)
-        #            f.set_refine_criteria(ratio = 2.0, slope = 0.05, curve = 0.05)
-        #            f.transport_model = 'Mix' # Solve with multi or mix component transport properties
-        #            f.solve(loglevel=1,auto=True,refine_grid=True) #
-        #            S = f.u[0] #
-        #        else:
-        #            Xh2 = float(gas_u['H2'].X)
-        #            #Laminar Burning Velocity for Hydrogen
-        #            # From Liu and MacFarlane for Xh2 < 0.42
-        #            A1 = 4.644E-4
-        #            A2 = -2.119E-3
-        #            A3 = 2.344E-3
-        #            A4 = 1.571
-        #            A5 = 3.839E-1
-        #            A6 = -2.21
-        #            xh2O = 0.0          #mol fraction of steam
-        #            S = ((A1 + A2*(0.42-Xh2)+A3*(0.42-Xh2)**2) * Tu**(A4+A5*(0.42-Xh2)))*np.exp(A6*xh2O)
+        # # Calculate Laminar Flamespeed
+        # CalcFlamespeed = False
+        # if CalcFlamespeed:
+        #     # A freely-propagating flat flame
+        #     f = ct.FreeFlame(unburned, width=5)
+        #     # Energy equation enabled
+        #     f.energy_enabled = True
+        #     f.set_max_time_step(1000)
+        #     f.set_refine_criteria(ratio = 2.0, slope = 0.05, curve = 0.05)
+        #     # Solve with multi or mix component transport properties
+        #     f.transport_model = 'Mix'
+        #     f.solve(loglevel=1,auto=True,refine_grid=True)
+        #     S = f.u[0]
+        # else:
+        #     Xh2 = float(gas_u['H2'].X)
+        #     #Laminar Burning Velocity for Hydrogen
+        #     # From Liu and MacFarlane for Xh2 < 0.42
+        #     A1 = 4.644E-4
+        #     A2 = -2.119E-3
+        #     A3 = 2.344E-3
+        #     A4 = 1.571
+        #     A5 = 3.839E-1
+        #     A6 = -2.21
+        #     xh2O = 0.0  # mol fraction of steam
+        #     S = (((A1 + A2*(0.42-Xh2)+A3*(0.42-Xh2)**2) *
+        #          Tu**(A4+A5*(0.42-Xh2)))*np.exp(A6*xh2O))
 
         # Unburned Gas Properties
         cp_aveu = gas_u.cp
@@ -112,7 +115,8 @@ class explosion():
 
         # Burned Gas Properties
         # Chemical Equilibrium
-        burned.equilibrate('HP', solver='gibbs', max_steps=1000)  # equilibrate the mixture adiabatically at constant P
+        # equilibrate the mixture adiabatically at constant P
+        burned.equilibrate('HP', solver='gibbs', max_steps=1000)
         cp_aveb = gas_b.cp  # Average Cp
         cv_aveb = gas_b.cv  # Average Cv
         W_aveb = gas_b.mean_molecular_weight  # Average Molecular wt
@@ -121,8 +125,10 @@ class explosion():
         gas_bv.equilibrate('UV')
         Pf_ = gas_bv.P / Patm
 
-        gammaU = cp_aveu / cv_aveu  # Ratio of specific heats for unburned gas = Cp/Cv
-        gammaB = cp_aveb / cv_aveb  # Ratio of specific heats
+        # Ratio of specific heats for unburned gas = Cp/Cvs
+        gammaU = cp_aveu / cv_aveu
+        # Ratio of specific heats
+        gammaB = cp_aveb / cv_aveb
         gammaE = (gammaU - 1) / (gammaB - 1)
         # gammaE=1.0
 
@@ -131,10 +137,12 @@ class explosion():
         mi = rou * V1  # Initial Mass
 
         # print("Unburned Mol Fraction")
-        # print(gas_u.species_names,'\n', gas_u.X , '\n', 'Mass Fraction \n', gas_u.Y)
+        # print(gas_u.species_names,'\n', gas_u.X , '\n',
+        #       'Mass Fraction \n', gas_u.Y)
         # print("Burned Mol Fraction")
-        # print(gas_b.species_names, '\n',gas_b.X ,'\n', 'Mass Fraction \n', gas_b.Y)
-        ##print("S:  ",S)
+        # print(gas_b.species_names, '\n',gas_b.X ,'\n',
+        #       'Mass Fraction \n', gas_b.Y)
+        # print("S:  ",S)
         # print("Tb: ",Tb)
         # print("Pf: ",Pf_)
         # print("GammaE:", gammaE)
@@ -150,7 +158,8 @@ class explosion():
 
         # Solve ODE's
         x = odeint(vent_gas_explosion, init, t,
-                   args=(P1, R, V1, gammaE, Pf_, gammaU, mi, gas_u, S, rou, rob, gammaB, Cd, Av, f, T1, Pa))
+                   args=(P1, R, V1, gammaE, Pf_, gammaU, mi, gas_u, S, rou,
+                         rob, gammaB, Cd, Av, f, T1, Pa))
 
         # Output
         self.P_ = x[:, 0]  # Pressure/initial pressure
@@ -160,7 +169,8 @@ class explosion():
         self.t = t
         self.nu = 1 - self.n  # Ratio of unburned mass/initial mass
         self.mu = mi * self.nu  # Mass of unburned gas
-        nmu = self.mu / (gas_u.mean_molecular_weight / 1000)  # Number of unburned moles
+        # Number of unburned moles
+        nmu = self.mu / (gas_u.mean_molecular_weight / 1000)
 
         self.Vu = (1 - self.n3) * V1
         self.Tu = self.P_ * Patm * self.Vu / (nmu * RR)
@@ -171,7 +181,8 @@ class explosion():
         self.Pf_ = Pf_
 
 
-def vent_gas_explosion(Y, t, P1, R, V1, gammaE, Pf_, gammaU, mi, gas_u, S, rou, rob, gammaB, Cd, Av, f, T1, Pa):
+def vent_gas_explosion(Y, t, P1, R, V1, gammaE, Pf_, gammaU, mi, gas_u, S, rou,
+                       rob, gammaB, Cd, Av, f, T1, Pa):
     P_ = Y[0]
     n3 = Y[1]
     n = Y[2]
@@ -193,17 +204,17 @@ def vent_gas_explosion(Y, t, P1, R, V1, gammaE, Pf_, gammaU, mi, gas_u, S, rou, 
 
     Vu = (1 - n3) * V1
     Tu = P_ * P1 * Vu / (nmu * RR)
-    # St = S*f*(P_**0.1)*((Tu/T1)**1.721)
+    St = S * f * (P_ ** 0.1) * ((Tu / T1) ** 1.721)
     St = S * f
-    # print(St)
+    print(St, Tu)
 
     if r < R:  # Unburnt gas venting
         PcriticalInv = (2 / (gammaU + 1)) ** (gammaU / (gammaU - 1))
         if Pa / P < PcriticalInv:
             ddt_mv_mi = Cd * Av * rou / mi * (
-                        gammaU * P / rou * ((1 + gammaU) / 2) ** ((1 + gammaU) / (1 - gammaU))) ** 0.5
+                        gammaU * P / rou * ((1 + gammaU) / 2) ** ((1 + gammaU) / (1 - gammaU))) ** 0.5  # noqa
         else:
-            ddt_mv_mi = Cd * Av / mi * (2 * gammaU * P * rou / (gammaU - 1) * (P / Pa) ** (2 / gammaU) * (
+            ddt_mv_mi = Cd * Av / mi * (2 * gammaU * P * rou / (gammaU - 1) * (P / Pa) ** (2 / gammaU) * (  # noqa
                         1 - (Pa / P) ** ((gammaU - 1) / gammaU))) ** 0.5
         dndt = (AV1) * P_ ** (1 / gammaU) * St
         if n3 >= 1:
@@ -214,9 +225,9 @@ def vent_gas_explosion(Y, t, P1, R, V1, gammaE, Pf_, gammaU, mi, gas_u, S, rou, 
         PcriticalInv = (2 / (gammaB + 1)) ** (gammaB / (gammaB - 1))
         if Pa / P < PcriticalInv:
             ddt_mv_mi = Cd * Av * rob / mi * (
-                        gammaB * P / rob * ((1 + gammaB) / 2) ** ((1 + gammaB) / (1 - gammaB))) ** 0.5
+                        gammaB * P / rob * ((1 + gammaB) / 2) ** ((1 + gammaB) / (1 - gammaB))) ** 0.5  # noqa
         else:
-            ddt_mv_mi = Cd * Av / mi * (2 * gammaU * P * rob / (gammaB - 1) * (P / Pa) ** (2 / gammaB) * (
+            ddt_mv_mi = Cd * Av / mi * (2 * gammaU * P * rob / (gammaB - 1) * (P / Pa) ** (2 / gammaB) * (  # noqa
                         1 - (Pa / P) ** ((gammaB - 1) / gammaB))) ** 0.5
         dndt = (AV1) * P_ ** (1 / gammaU) * St - ddt_mv_mi
         if n3 >= 1:
@@ -230,7 +241,8 @@ def vent_gas_explosion(Y, t, P1, R, V1, gammaE, Pf_, gammaU, mi, gas_u, S, rou, 
 
 
 def PieGraph(gas):
-    # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+    # Pie chart, where the slices will be ordered and
+    # plotted counter-clockwise:
     species = np.argwhere(gas.X > 0.01)[:, 0].tolist()
     labels = gas[species].species_names
     sizes = gas[species].X
@@ -238,6 +250,7 @@ def PieGraph(gas):
     fig1, ax1 = plt.subplots()
     ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
             shadow=True, startangle=90)
-    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    # Equal aspect ratio ensures that pie is drawn as a circle.
+    ax1.axis('equal')
 
     plt.show()
