@@ -197,16 +197,16 @@ def vent_gas_explosion(Y, t, P1, R, V1, gammaE, Pf_, gammaU, mi, gas_u, S, rou,
     A21 = 1 + n3 ** (gammaE - 1)
     A22 = P_ * (gammaE - 1)
 
-    # St = S*f*P_**0.1
-    nu = 1 - n  # Ratio of unburned mass/initial mass
-    mu = mi * nu  # Mass of unburned gas
-    nmu = mu / (gas_u.mean_molecular_weight / 1000)  # Number of unburned moles
+    # St = S * f * P_ ** 0.1
+    # nu = 1 - n  # Ratio of unburned mass/initial mass
+    # mu = mi * nu  # Mass of unburned gas
+    # Number of unburned moles
+    # nmu = mu / (gas_u.mean_molecular_weight / 1000)
 
-    Vu = (1 - n3) * V1
-    Tu = P_ * P1 * Vu / (nmu * RR)
-    St = S * f * (P_ ** 0.1) * ((Tu / T1) ** 1.721)
+    # Vu = (1 - n3) * V1
+    # Tu = P_ * P1 * Vu / (nmu * RR)
+    # St = S * f * (P_ ** 0.1) * ((Tu / T1) ** 1.721)
     St = S * f
-    print(St, Tu)
 
     if r < R:  # Unburnt gas venting
         PcriticalInv = (2 / (gammaU + 1)) ** (gammaU / (gammaU - 1))
