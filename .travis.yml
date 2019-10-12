@@ -12,7 +12,7 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n fire-test python=3.7 flake8
+  - conda create -q -n fire-test python=3.6 flake8
   - conda activate fire-test
 
 script:
