@@ -10,6 +10,7 @@ import cantera as ct
 import pandas as pd
 import numpy as np
 import collections
+import os.path as op
 
 import plotly.io as pio
 import plotly.figure_factory as ff
@@ -52,7 +53,9 @@ air = {'N2': 3.76, 'O2': 1}
 
 fuel = fuelLFP
 
-dfTempCrit = pd.read_excel('TempCriteriaData.xlsx', index_col=0)
+data_path = op.join(op.dirname(__file__),
+                    'example_data', 'TempCriteriaData.xlsx')
+dfTempCrit = pd.read_excel(data_path, index_col=0)
 
 gaslist = ['H2', 'CO', 'CH4', 'C2H6', 'C3H8']
 gaslistinert = ['H2O', 'CO2', 'N2']

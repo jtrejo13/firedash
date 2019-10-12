@@ -29,7 +29,7 @@ fuel_species = 'H2:1'  # H2
 np.set_printoptions(suppress=True, precision=3)
 
 # Open spreadsheet of literature gas compositions
-dfo = pd.read_excel('Vent Gas Lit Review.xlsx', skiprows=1)
+dfo = pd.read_excel('VentGasLitReview.xlsx', skiprows=1)
 
 # Choose what you want to run
 # Only execute for gases where execute = Yes
