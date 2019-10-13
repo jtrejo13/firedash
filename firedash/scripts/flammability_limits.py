@@ -17,6 +17,8 @@ import plotly.figure_factory as ff
 import time
 
 pio.renderers.default = "browser"
+# Remove extra leading /
+pio.orca.config._constants['plotlyjs'] = pio.orca.config.plotlyjs[1:]
 
 
 def makeAxis(title, tickangle):
@@ -189,6 +191,8 @@ def MakePlots(dff, name):
     phi = np.array(dff.phi.tolist())
     phi[phi > 2] = 2
     flm = np.array(dff.Flammable.tolist())
+    pio.orca.ensure_server()
+    time.sleep(10)
     fgg = ff.create_ternary_contour(np.array([Xf, Xa, Xi]), Tad,
                                     pole_labels=['Fuel', 'Air', 'Inert'],
                                     interp_mode='cartesian', colorscale='Hot',
@@ -213,8 +217,9 @@ def MakePlots(dff, name):
     return fgg, fgg2, fgg3
 
 
-dfLFP = doAnalysis(fuelLFP)
-dfLFP.to_csv('fuelLFP.csv')
+# dfLFP = doAnalysis(fuelLFP)
+# dfLFP.to_csv('fuelLFP.csv')
+dfLFP = pd.read_csv('fuelLFP.csv')
 MakePlots(dfLFP, 'LFP 2015')
 
 # dfSom = doAnalysis(fuelSom100pct)
