@@ -1,7 +1,10 @@
 FROM heroku/miniconda
 
-# Grab requirements.txt.
+# Grab requirements.txt
 ADD ./requirements.txt /tmp/requirements.txt
+
+# Grab environment.yml
+ADD ./environment.yml /tmp/environment.yml
 
 # Install dependencies
 RUN pip install -qr /tmp/requirements.txt
@@ -10,6 +13,7 @@ RUN pip install -qr /tmp/requirements.txt
 ADD ./firedash /opt/firedash/
 WORKDIR /opt/firedash
 
-RUN conda env create -f environment.yml
+RUN conda update conda
+RUN conda env create -f /tmp/environment.yml
 
 CMD gunicorn --bind 0.0.0.0:$PORT wsgi
