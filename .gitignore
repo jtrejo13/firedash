@@ -2,6 +2,6 @@
 *.DS_Store
 __pycache__
 .idea/
-TempCriteriaData.xlsx
-VentGasLitReview.xlsx
+.ipynb_checkpoints/
+*.xlsx
 fuelLFP.csv
