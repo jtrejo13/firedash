@@ -17,8 +17,3 @@ install:
 
 script:
   - python -m flake8
-
-deploy:
-  provider: heroku
-  api_key: $HEROKU_API_KEY
-  app: fire-dash-first
