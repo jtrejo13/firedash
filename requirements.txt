@@ -1,6 +1,0 @@
-distribute
-Flask==1.1.1
-gunicorn==19.9.0
-Jinja2==2.10.3
-Werkzeug==0.16.0
-wsgiref
