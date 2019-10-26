@@ -12,6 +12,7 @@ dependencies:
   - flask=1.1.1
   - matplotlib=2.2*
   - numpy=1.13*
+  - pandas=0.25.2
   - pip
   - python=3.6.9
   - scipy=1.1*
