@@ -7,7 +7,7 @@ Created on Wed Oct 24 12:31:30 2018
 
 import numpy as np
 import matplotlib.pyplot as plt
-from explosion_model import Explosion, Input, Patm, psi
+from explosion_model import Explosion, Inputs, Patm, psi
 
 fuel_species = 'H2:1'  # H2
 # fuel_species = {'H2':1}  # Hydrogen Fuel
@@ -27,7 +27,7 @@ fuel_species = 'H2:1'  # H2
 #                 'C2H4:0.027186557, C2H6:0.0035904,  C3H8:0.011972727')
 
 # Gas Properties Inputs
-gas = Input(
+gas = Inputs(
     air={'O2': 1, 'N2': 3.76},
     fuel=fuel_species,
     phi=1.0,  # Composition
@@ -38,7 +38,7 @@ gas = Input(
 )
 
 # Room Geometry Inputs
-geom = Input(
+geom = Inputs(
     # R = 0.198,  # Radius (m)
     R=0.378,
     Cd=0.50,  # Coefficient for vent
@@ -46,7 +46,7 @@ geom = Input(
 )
 
 # Control Inputs
-cntrl = Input(
+cntrl = Inputs(
     tmax=0.35  # Max Time for analysis
 )
 

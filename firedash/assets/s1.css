@@ -115,7 +115,7 @@ html {
   font-size: 62.5%; }
 body {
   font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
-  line-height: 2.7;
+  line-height: 1.8;
   font-weight: 400;
   font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: rgb(50, 50, 50);
@@ -150,8 +150,9 @@ body {
   margin: 0;
   padding: 10px;
   padding-bottom: 0px;
+  padding-top: 0px;
   margin-bottom: 0px;
-  width: calc(100%-40px);
+  width: 100%;
 }
 
 .rc-slider {
