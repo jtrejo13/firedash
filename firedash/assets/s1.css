@@ -150,8 +150,9 @@ body {
   margin: 0;
   padding: 10px;
   padding-bottom: 0px;
+  padding-top: 0px;
   margin-bottom: 0px;
-  width: calc(100%-40px);
+  width: 100%;
 }
 
 .rc-slider {

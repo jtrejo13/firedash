@@ -12,7 +12,7 @@ def psi(P_):
     return (P_ * Patmpsi - Patmpsi)
 
 
-class Input():
+class Inputs():
     def __init__(self, *args, **kwargs):
         for k, v in kwargs.items():
             setattr(self, k, v)
