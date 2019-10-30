@@ -10,11 +10,11 @@ dependencies:
   - dash-daq=0.2.2
   - flake8=3.7*
   - flask=1.1.1
-  - matplotlib=2.2*
   - numpy=1.13*
   - pandas=0.25.2
   - pip
   - python=3.6.9
+  - pymongo=3.9.0
   - scipy=1.1*
   - pip:
     - gunicorn==19.9.0

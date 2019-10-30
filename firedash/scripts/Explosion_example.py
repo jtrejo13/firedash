@@ -6,7 +6,6 @@ Created on Wed Oct 24 12:31:30 2018
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 from explosion_model import Explosion, Inputs, Patm, psi
 
 fuel_species = 'H2:1'  # H2
@@ -55,6 +54,4 @@ r = Explosion(gas=gas, geom=geom, cntrl=cntrl)
 r.run()
 fuel_conc = 1 - sum(r.gas_u['N2', 'O2'].X)
 print(r.P_.max(), r.Pf_, r.Tb, fuel_conc)
-plt.plot(r.t, r.P_)
 P = psi(np.nanmax(r.P_))
-plt.show()

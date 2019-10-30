@@ -5,7 +5,6 @@ Created on Wed Sep  4 10:38:16 2019
 @author: erik
 """
 
-import matplotlib.pyplot as plt
 import cantera as ct
 import pandas as pd
 import numpy as np
@@ -33,8 +32,6 @@ def makeAxis(title, tickangle):
         'showgrid': True
     }
 
-
-plt.close('all')
 
 # Setup Cantera
 Pi = 101000  # Initial pressure Pa
