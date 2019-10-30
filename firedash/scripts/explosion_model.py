@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.integrate import odeint
-import matplotlib.pyplot as plt
 import cantera as ct
 
 RR = 8.314
@@ -238,19 +237,3 @@ def vent_gas_explosion(Y, t, P1, R, V1, gammaE, Pf_, gammaU, mi, gas_u, S, rou,
     dn3dt = (B2 * A11 - B1 * A21) / (A11 * A22 - A12 * A21)
     dydt = [dPdt, dn3dt, dndt]
     return dydt
-
-
-def PieGraph(gas):
-    # Pie chart, where the slices will be ordered and
-    # plotted counter-clockwise:
-    species = np.argwhere(gas.X > 0.01)[:, 0].tolist()
-    labels = gas[species].species_names
-    sizes = gas[species].X
-
-    fig1, ax1 = plt.subplots()
-    ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
-            shadow=True, startangle=90)
-    # Equal aspect ratio ensures that pie is drawn as a circle.
-    ax1.axis('equal')
-
-    plt.show()
