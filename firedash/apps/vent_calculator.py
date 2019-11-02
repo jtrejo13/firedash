@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import copy
 import json
 
 import dash_core_components as dcc
@@ -7,32 +8,13 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from app import app
+from .controls import GAS_COLORS, plot_layout
 from db.api import get_unique
 from scripts.explosion_model import Explosion, Inputs, Patm
-from .util import AIR_SPECIES, CANTERA_GASES, MAIN_COLLECTION
-
-
-def _add_search_filter(search=None):
-    """ Add filter to ensure presence of CO2, H2, CH4 or C3H8. """
-    search_filter = {
-        "$and": [
-            {"$or": [{'Gases.CO2': {'$gt': 0}}, {'Gases.H2': {'$gt': 0}},
-                     {'Gases.CH4': {'$gt': 0}}, {'Gases.C3H8': {'$gt': 0}}]}
-        ]
-    }
-    if search:
-        search_filter['$and'].append(search)
-
-    return search_filter
-
-
-def get_publications():
-    """ Get fields for publications dropdown. """
-    search = _add_search_filter()
-    publications = sorted(get_unique(collection=MAIN_COLLECTION,
-                                     field='Publication',
-                                     search=search))
-    return [{'label': pub, 'value': pub} for pub in publications]
+from .util import (
+    _add_search_filter, AIR_SPECIES, CANTERA_GASES, get_publications,
+    MAIN_COLLECTION
+)
 
 
 # Create app layout
@@ -40,28 +22,31 @@ layout = html.Div(
     [
         html.Div(
             [
-                html.Img(
-                    src=("https://www.nicepng.com/png/full/832-8326149_shield"
-                         "-university-of-texas-at-austin-mechanical-"
-                         "engineering.png"),
+                html.Div(
+                    [
+                        html.Img(
+                            src=("https://www.nicepng.com/png/full/832-8326149_shield"
+                                 "-university-of-texas-at-austin-mechanical-"
+                                 "engineering.png"),
+                            style={
+                                "height": "60px",
+                                "width": "auto",
+                            }
+                        )
+                    ],
                     className='one-third column',
-                    style={
-                        "height": "60px",
-                        "width": "auto",
-                        "margin-bottom": "25px"
-                    }
                 ),
                 html.Div(
                     [
                         html.H3(
-                            'Vent Calculator',
+                            'Building Deflagration',
                             style={
                                 "margin-tom": "0px",
                                 "margin-bottom": "0px"
                             }
                         ),
                         html.H5(
-                            'Fire Research Group',
+                            'Pressure Time History',
                             style={
                                 "margin-bottom": "25px"
                             }
@@ -76,6 +61,7 @@ layout = html.Div(
                             html.Button("Hazard Analysis",
                                         id="hazard-analysis"),
                             href="/apps/hazard_analysis",
+                            style={"float": "right"}
                         )
                     ],
                     className="one-third column",
@@ -212,24 +198,22 @@ layout = html.Div(
         ),
         html.Div(
             [
+                html.Div(id='vent_gas_temp', style={'display': 'none'}),
                 html.Div(
                     [
-                        html.P(
-                            id="vent_gas_temp",
-                            className="pretty_container"
-                        ),
+                        dcc.Graph(id='composition_plot')
                     ],
-                    id="infoContainer",
-                    className="row"
+                    className='pretty_container four columns',
                 ),
                 html.Div(
-                    [dcc.Graph(id='explosion_plot')],
+                    [
+                        dcc.Graph(id='explosion_plot')
+                    ],
                     id="explosionGraphContainer",
-                    className="pretty_container"
+                    className="pretty_container eight columns"
                 )
             ],
-            id="rightCol",
-            className="twelve columns"
+            className="row"
         )
     ],
     id="mainContainer",
@@ -352,6 +336,43 @@ def update_gases(publication, cell_type, chemistry, electrolyte, soc):
 
 
 @app.callback(
+    Output("composition_plot", "figure"),
+    [Input("vent_gas_temp", "children")],
+)
+def make_gas_composition_plot(gases):
+    """ Create gas composition plot. """
+    gases = json.loads(gases) if gases else {}
+    data = []
+
+    if gases:
+        fuel_species = _get_fuel_species(gases)
+
+        data = [
+            dict(
+                type="pie",
+                labels=[key for key, val in fuel_species.items() if val > 0],
+                values=[val for val in fuel_species.values() if val > 0],
+                name="Fuel Species Composition",
+                textinfo="label",
+                textfont=dict(size="18", color="#FFFFFF"),
+                hoverinfo="label+percent",
+                marker=dict(colors=[GAS_COLORS[gas] for gas in fuel_species]),
+            ),
+        ]
+
+    layout = copy.deepcopy(plot_layout)
+    layout["title"] = "Fuel Species Composition"
+    layout["margin"] = dict(l=30, r=30, b=20, t=40)  # noqa
+    layout["legend"] = dict(
+        font=dict(color="#777777", size="12"),
+        orientation="h",
+    )
+
+    figure = dict(data=data, layout=layout)
+    return figure
+
+
+@app.callback(
     Output("explosion_plot", "figure"),
     [
         Input("vent_gas_temp", "children"),
@@ -401,20 +422,17 @@ def make_explosion_figure(gases, radius, area, drag):
                 mode="lines",
                 x=explosion.t,
                 y=explosion.P_,
-                name="Explosion Pressure Over Time",
+                name="Explosion Pressure vs. Time",
                 opacity=1,
                 hoverinfo="skip",
             )
         ]
 
-    layout = dict(
-        title="Pressure Over Time",
-        dragmode="select",
-        showlegend=False,
-        autosize=True,
-        xaxis={"title": {"text": "time (s)"}},
-        yaxis={"title": {"text": "Pressure (MPa)"}},
-    )
+    layout = copy.deepcopy(plot_layout)
+    layout["title"] = "Pressure vs. Time"
+    layout["showlegend"] = False
+    layout["xaxis"] = {"title": {"text": "time (s)"}}
+    layout["yaxis"] = {"title": {"text": "Pressure"}}
 
     figure = dict(data=data, layout=layout)
     return figure
