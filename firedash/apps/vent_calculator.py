@@ -25,35 +25,29 @@ layout = html.Div(
                 html.Div(
                     [
                         html.Img(
-                            src=("https://www.nicepng.com/png/full/832-8326149_shield"
-                                 "-university-of-texas-at-austin-mechanical-"
-                                 "engineering.png"),
+                            src=("/assets/shield.png"),
                             style={
                                 "height": "60px",
                                 "width": "auto",
                             }
                         )
                     ],
+                    id="logo",
                     className='one-third column',
                 ),
                 html.Div(
                     [
                         html.H3(
                             'Building Deflagration',
-                            style={
-                                "margin-tom": "0px",
-                                "margin-bottom": "0px"
-                            }
+                            style={"margin-bottom": "0px"}
                         ),
                         html.H5(
-                            'Pressure Time History',
-                            style={
-                                "margin-bottom": "25px"
-                            }
+                            'Pressure-Time History',
                         )
                     ],
                     id="title",
-                    className='one-half column'
+                    className='one-half column',
+                    style={"margin-bottom": "30px"}
                 ),
                 html.Div(
                     [

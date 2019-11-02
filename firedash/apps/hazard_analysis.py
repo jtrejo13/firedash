@@ -2,48 +2,44 @@
 import dash_core_components as dcc
 import dash_html_components as html
 
+from .util import get_publications
+
 
 # Create app layout
 layout = html.Div(
     [
         html.Div(
             [
-                html.Img(
-                    src=("https://www.nicepng.com/png/full/832-8326149_shield"
-                         "-university-of-texas-at-austin-mechanical-"
-                         "engineering.png"),
+                html.Div(
+                    [
+                        html.Img(
+                            src=("/assets/shield.png"),
+                            style={
+                                "height": "60px",
+                                "width": "auto",
+                            }
+                        )
+                    ],
+                    id="logo",
                     className='one-third column',
-                    style={
-                        "height": "60px",
-                        "width": "auto",
-                        "margin-bottom": "25px"
-                    }
                 ),
                 html.Div(
                     [
                         html.H3(
                             'Battery Vent Gas Hazard Analysis',
-                            style={
-                                "margin-tom": "0px",
-                                "margin-bottom": "0px"
-                            }
                         ),
-                        html.H5(
-                            'Fire Research Group',
-                            style={
-                                "margin-bottom": "0px"
-                            }
-                        )
                     ],
                     id="title",
-                    className='one-half column'
+                    className='one-half column',
+                    style={"margin-bottom": "30px"}
                 ),
                 html.Div(
                     [
                         html.A(
-                            html.Button("Vent Calculator",
-                                        id="vent-calculator"),
+                            html.Button("Building Deflagration",
+                                        id="building-deflagration"),
                             href="/apps/vent_calculator",
+                            style={"float": "right"}
                         )
                     ],
                     className="one-third column",
@@ -58,118 +54,88 @@ layout = html.Div(
         ),
         html.Div(
             [
-                html.Div(
-                    [
-                        html.P(
-                            ('Filter by publication date:'),
-                            className="control_label"
-                        ),
-                        dcc.RangeSlider(
-                            id='year_slider',
-                            min=1960,
-                            max=2017,
-                            value=[1990, 2010],
-                            className="dcc_control"
-                        ),
-                        html.P(
-                            'Filter by cell type:',
-                            className="control_label"
-                        ),
-                        dcc.Dropdown(
-                            id='cell_types',
-                            options=[],
-                            multi=True,
-                            value=[],
-                            className="dcc_control"
-                        ),
-                        html.P(
-                            'Filter by cell chemistry:',
-                            className="control_label"
-                        ),
-                        dcc.Dropdown(
-                            id='cell_chemistries',
-                            options=[],
-                            multi=True,
-                            value=[],
-                            className="dcc_control"
-                        ),
-                        html.P(
-                            'Filter by cell electrolyte:',
-                            className="control_label"
-                        ),
-                        dcc.Dropdown(
-                            id='cell_electrolytes',
-                            options=[],
-                            multi=True,
-                            value=[],
-                            className="dcc_control"
-                        ),
-                        html.P(
-                            'Filter by cell SOC:',
-                            className="control_label"
-                        ),
-                        dcc.Dropdown(
-                            id='cell_soc',
-                            options=[],
-                            multi=True,
-                            value=[],
-                            className="dcc_control"
-                        ),
-                    ],
-                    className="pretty_container four columns"
+                html.P(
+                    '1) Pick a battery explosion experiment:',
+                    style={
+                        "font-size": "1.5em",
+                        "margin-left": "10px",
+                        "margin-bottom": "10px"
+                    }
                 ),
                 html.Div(
                     [
-                        html.Div(
+                        html.Label(
                             [
-                                html.Div(
-                                    [
-                                        html.P("No. of Cells"),
-                                        html.H6(
-                                            id="cell_text",
-                                            className="info_text"
-                                        )
-                                    ],
-                                    id="cells",
-                                    className="pretty_container"
+                                'Publication:',
+                                dcc.Dropdown(
+                                    id='vent_ref_pub',
+                                    options=get_publications(),
                                 ),
-
                             ],
-                            id="infoContainer",
-                            className="row"
+                            className="control_label"
                         ),
-                        html.Div(
+                        html.Label(
                             [
-                                dcc.Graph(
-                                    id='count_graph',
-                                )
+                                'Cell type:',
+                                dcc.Dropdown(
+                                    id='vent_cell_types',
+                                ),
                             ],
-                            id="countGraphContainer",
-                            className="pretty_container"
-                        )
+                            className="control_label"
+                        ),
+                        html.Label(
+                            [
+                                'Chemistry:',
+                                dcc.Dropdown(
+                                    id='vent_cell_chemistry',
+                                ),
+                            ],
+                            className="control_label"
+                        ),
+                        html.Label(
+                            [
+                                'Electrolyte:',
+                                dcc.Dropdown(
+                                    id='vent_cell_electrolytes',
+                                ),
+                            ],
+                            className="control_label"
+                        ),
+                        html.Label(
+                            [
+                                'SOC:',
+                                dcc.Dropdown(
+                                    id='vent_cell_soc',
+                                ),
+                            ],
+                            className="control_label"
+                        ),
                     ],
-                    id="rightCol",
-                    className="eight columns"
-                )
-            ],
-            className="row"
+                    className="pretty_container row",
+                    style={
+                        'width': '75%',
+                    }
+                ),
+            ]
         ),
         html.Div(
             [
+                html.Div(id='vent_gas_temp', style={'display': 'none'}),
                 html.Div(
                     [
-                        dcc.Graph(id='main_graph')
-                    ],
-                    className='pretty_container eight columns',
-                ),
-                html.Div(
-                    [
-                        dcc.Graph(id='individual_graph')
+                        dcc.Graph(id='composition_plot')
                     ],
                     className='pretty_container four columns',
                 ),
+                html.Div(
+                    [
+                        dcc.Graph(id='main_plot')
+                    ],
+                    id="explosionGraphContainer",
+                    className="pretty_container eight columns"
+                )
             ],
-            className='row'
+            className="row"
         ),
         html.Div(
             [
