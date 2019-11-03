@@ -13,6 +13,25 @@ AIR_SPECIES = {'O2': 1, 'N2': 3.76}
 MAIN_COLLECTION = 'main'
 
 
+def _clean_search_dict(search):
+    """ Replace 'N/A' values with None in search dict. """
+    for key, value in search.items():
+        if value == 'N/A':
+            search[key] = None
+
+
+def _get_fuel_species(gases):
+    """ Make all non-Cantera gases Propane (C3H8). """
+    fuel_species = gases.copy()
+
+    for gas, quantity in gases.items():
+        if gas not in CANTERA_GASES:
+            fuel_species['C3H8'] += quantity
+            fuel_species.pop(gas)
+
+    return fuel_species
+
+
 def _add_search_filter(search=None):
     """ Add filter to ensure presence of CO2, H2, CH4 or C3H8. """
     search_filter = {
