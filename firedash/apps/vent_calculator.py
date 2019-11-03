@@ -10,8 +10,9 @@ from dash.dependencies import Input, Output
 from app import app
 from .callbacks import *  # noqa
 from .controls import plot_layout
+from .layouts import main_dropdowns
 from scripts.explosion_model import Explosion, Inputs, Patm
-from .util import _get_fuel_species, AIR_SPECIES, get_main_data
+from .util import _get_fuel_species, AIR_SPECIES
 
 
 # Create app layout
@@ -65,91 +66,11 @@ layout = html.Div(
                 "magin-bottom": "25px"
             }
         ),
+        main_dropdowns,
         html.Div(
             [
                 html.P(
-                    '1) Pick a battery explosion experiment:',
-                    style={
-                        "font-size": "1.5em",
-                        "margin-left": "10px",
-                        "margin-bottom": "10px"
-                    }
-                ),
-                html.Div(
-                    id='db_data',
-                    children=get_main_data(),
-                    style={'display': 'none'}
-                ),
-                html.Div(
-                    [
-                        html.Label(
-                            [
-                                'Publication:',
-                                dcc.Dropdown(
-                                    id='vent_ref_pub'
-                                ),
-                            ],
-                            className="control_label"
-                        ),
-                        html.Label(
-                            [
-                                'Cell type:',
-                                dcc.Dropdown(
-                                    id='vent_cell_types'
-                                ),
-                            ],
-                            className="control_label"
-                        ),
-                        html.Label(
-                            [
-                                'Chemistry:',
-                                dcc.Dropdown(
-                                    id='vent_cell_chemistry'
-                                ),
-                            ],
-                            className="control_label"
-                        ),
-                        html.Label(
-                            [
-                                'Electrolyte:',
-                                dcc.Dropdown(
-                                    id='vent_cell_electrolytes'
-                                ),
-                            ],
-                            className="control_label"
-                        ),
-                        html.Label(
-                            [
-                                'SOC:',
-                                dcc.Dropdown(
-                                    id='vent_cell_soc'
-                                ),
-                            ],
-                            className="control_label"
-                        ),
-                        html.Div(
-                            [
-                                html.Button(id='clear_button',
-                                            n_clicks=0,
-                                            children='Clear',
-                                            style={
-                                                'position': 'relative',
-                                                'top': '40%'}
-                                            ),
-                            ],
-                        ),
-                    ],
-                    className="pretty_container row",
-                    style={
-                        'width': '75%',
-                    }
-                ),
-            ]
-        ),
-        html.Div(
-            [
-                html.P(
-                    '2) Room and vent dimensions:',
+                    'Room and vent dimensions:',
                     style={
                         "font-size": "1.5em",
                         "margin-left": "10px",

@@ -69,7 +69,7 @@ def update_dropdowns(data, publication, cell_type, chemistry, electrolyte,
         State('vent_cell_chemistry', 'value'),
         State('vent_cell_electrolytes', 'value'),
         State('vent_cell_soc', 'value')]
-    )
+)
 def clear_dropdowns(n_clicks, publication, cell_type, chemistry, electrolyte,
                     soc):
     """ Clear dropdown menus. """
