@@ -6,14 +6,15 @@ import json
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+import pandas as pd
 
 from app import app
 from .controls import GAS_COLORS, plot_layout
 from db.api import get_unique
 from scripts.explosion_model import Explosion, Inputs, Patm
 from .util import (
-    _add_search_filter, AIR_SPECIES, CANTERA_GASES, get_publications,
-    MAIN_COLLECTION
+    _add_search_filter, AIR_SPECIES, CANTERA_GASES, get_main_data,
+    MAIN_COLLECTION, make_options
 )
 
 
@@ -79,13 +80,17 @@ layout = html.Div(
                     }
                 ),
                 html.Div(
+                    id='db_data',
+                    children=get_main_data(),
+                    style={'display': 'none'}
+                ),
+                html.Div(
                     [
                         html.Label(
                             [
                                 'Publication:',
                                 dcc.Dropdown(
-                                    id='vent_ref_pub',
-                                    options=get_publications(),
+                                    id='vent_ref_pub'
                                 ),
                             ],
                             className="control_label"
@@ -94,7 +99,7 @@ layout = html.Div(
                             [
                                 'Cell type:',
                                 dcc.Dropdown(
-                                    id='vent_cell_types',
+                                    id='vent_cell_types'
                                 ),
                             ],
                             className="control_label"
@@ -103,7 +108,7 @@ layout = html.Div(
                             [
                                 'Chemistry:',
                                 dcc.Dropdown(
-                                    id='vent_cell_chemistry',
+                                    id='vent_cell_chemistry'
                                 ),
                             ],
                             className="control_label"
@@ -112,7 +117,7 @@ layout = html.Div(
                             [
                                 'Electrolyte:',
                                 dcc.Dropdown(
-                                    id='vent_cell_electrolytes',
+                                    id='vent_cell_electrolytes'
                                 ),
                             ],
                             className="control_label"
@@ -121,7 +126,7 @@ layout = html.Div(
                             [
                                 'SOC:',
                                 dcc.Dropdown(
-                                    id='vent_cell_soc',
+                                    id='vent_cell_soc'
                                 ),
                             ],
                             className="control_label"
@@ -218,16 +223,6 @@ layout = html.Div(
 )
 
 
-def _make_options(values):
-    """ Create list of options from list of values. """
-    options = []
-    for value in values:
-        if value is None:
-            value = 'N/A'
-        options.append({'label': value, 'value': value})
-    return options
-
-
 def _clean_search_dict(search):
     """ Replace 'N/A' values with None in search dict. """
     for key, value in search.items():
@@ -248,65 +243,42 @@ def _get_fuel_species(gases):
 
 
 @app.callback(
-    Output('vent_cell_types', 'options'),
-    [Input('vent_ref_pub', 'value')])
-def update_cell_types_dropdown(publication):
-    """ Update cell types dropdown based on selected value. """
-    search = {'Publication': publication}
-    _clean_search_dict(search)
-    search = _add_search_filter(search)
-    values = get_unique(MAIN_COLLECTION, field='Format', search=search)
-    return _make_options(values)
-
-
-@app.callback(
-    Output('vent_cell_chemistry', 'options'),
     [
-        Input('vent_ref_pub', 'value'),
-        Input('vent_cell_types', 'value')
-    ])
-def update_cell_chemistry_dropdown(publication, cell_type):
-    """ Update cell chemistries dropdown based on selected values. """
-    search = {'Publication': publication, 'Format': cell_type}
-    _clean_search_dict(search)
-    search = _add_search_filter(search)
-    values = get_unique(MAIN_COLLECTION, field='Chemistry', search=search)
-    return _make_options(values)
-
-
-@app.callback(
-    Output('vent_cell_electrolytes', 'options'),
+        Output('vent_ref_pub', 'options'),
+        Output('vent_cell_types', 'options'),
+        Output('vent_cell_chemistry', 'options'),
+        Output('vent_cell_electrolytes', 'options'),
+        Output('vent_cell_soc', 'options')],
     [
-        Input('vent_ref_pub', 'value'),
-        Input('vent_cell_types', 'value'),
-        Input('vent_cell_chemistry', 'value')
-    ])
-def update_cell_electrolyte_dropdown(publication, cell_type, chemistry):
-    """ Update cell electrolytes dropdown based on selected values. """
-    search = {'Publication': publication, 'Format': cell_type,
-              'Chemistry': chemistry}
-    _clean_search_dict(search)
-    search = _add_search_filter(search)
-    values = get_unique(MAIN_COLLECTION, field='Electrolyte', search=search)
-    return _make_options(values)
-
-
-@app.callback(
-    Output('vent_cell_soc', 'options'),
-    [
+        Input('db_data', 'children'),
         Input('vent_ref_pub', 'value'),
         Input('vent_cell_types', 'value'),
         Input('vent_cell_chemistry', 'value'),
-        Input('vent_cell_electrolytes', 'value')
+        Input('vent_cell_electrolytes', 'value'),
+        Input('vent_cell_soc', 'value')
     ])
-def update_cell_soc_dropdown(publication, cell_type, chemistry, electrolyte):
-    """ Update cell SOC dropdown based on selected values. """
-    search = {'Publication': publication, 'Format': cell_type,
-              'Chemistry': chemistry, 'Electrolyte': electrolyte}
-    _clean_search_dict(search)
-    search = _add_search_filter(search)
-    values = get_unique(MAIN_COLLECTION, field='SOC', search=search)
-    return _make_options(values)
+def update_dropdowns(data, publication, cell_type, chemistry, electrolyte,
+                     soc):
+    """ Update gas dropdown databa based on selections. """
+    df = pd.DataFrame(json.loads(data))
+
+    if publication:
+        df = df[df['Publication'] == publication]
+    if cell_type:
+        df = df[df['Format'] == cell_type]
+    if chemistry:
+        df = df[df['Chemistry'] == chemistry]
+    if electrolyte:
+        df = df[df['Electrolyte'] == electrolyte]
+    if soc:
+        df = df[df['SOC'] == soc]
+
+    fields = ['Publication', 'Format', 'Chemistry', 'Electrolyte', 'SOC']
+    results = []
+    for field in fields:
+        result = list(df[field].unique())
+        results.append(make_options(result))
+    return results
 
 
 @app.callback(

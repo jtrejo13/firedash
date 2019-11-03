@@ -2,7 +2,7 @@
 import dash_core_components as dcc
 import dash_html_components as html
 
-from .util import get_publications
+from .util import get_main_data
 
 
 # Create app layout
@@ -63,13 +63,17 @@ layout = html.Div(
                     }
                 ),
                 html.Div(
+                    id='db_data',
+                    children=get_main_data(),
+                    style={'display': 'none'}
+                ),
+                html.Div(
                     [
                         html.Label(
                             [
                                 'Publication:',
                                 dcc.Dropdown(
                                     id='vent_ref_pub',
-                                    options=get_publications(),
                                 ),
                             ],
                             className="control_label"
