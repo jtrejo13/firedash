@@ -4,7 +4,6 @@ import dash_html_components as html
 
 from .callbacks import *  # noqa
 from .layouts import main_dropdowns
-from .util import get_main_data
 
 
 # Create app layout
