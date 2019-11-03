@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from db.api import get_unique
+import json
+
+from db.api import find
 
 # Constants
 CANTERA_GASES = ['CO2', 'CO', 'H2', 'CH4', 'C2H4', 'C2H6', 'C3H8', 'N2', 'O2',
@@ -9,6 +11,25 @@ CANTERA_GASES = ['CO2', 'CO', 'H2', 'CH4', 'C2H4', 'C2H6', 'C3H8', 'N2', 'O2',
 AIR_SPECIES = {'O2': 1, 'N2': 3.76}
 # Main collection name
 MAIN_COLLECTION = 'main'
+
+
+def _clean_search_dict(search):
+    """ Replace 'N/A' values with None in search dict. """
+    for key, value in search.items():
+        if value == 'N/A':
+            search[key] = None
+
+
+def _get_fuel_species(gases):
+    """ Make all non-Cantera gases Propane (C3H8). """
+    fuel_species = gases.copy()
+
+    for gas, quantity in gases.items():
+        if gas not in CANTERA_GASES:
+            fuel_species['C3H8'] += quantity
+            fuel_species.pop(gas)
+
+    return fuel_species
 
 
 def _add_search_filter(search=None):
@@ -25,10 +46,20 @@ def _add_search_filter(search=None):
     return search_filter
 
 
-def get_publications():
-    """ Get fields for publications dropdown. """
+def make_options(values):
+    """ Create list of options from list of values. """
+    options = []
+    for value in values:
+        label = 'N/A' if value == '' else value
+        options.append({'label': label, 'value': value})
+    return options
+
+
+def get_main_data():
+    """ Get data in main collection in JSON serialized form. """
     search = _add_search_filter()
-    publications = sorted(get_unique(collection=MAIN_COLLECTION,
-                                     field='Publication',
-                                     search=search))
-    return [{'label': pub, 'value': pub} for pub in publications]
+    cols = {'Publication': 1, 'Format': 1, 'Chemistry': 1, 'Electrolyte': 1,
+            'SOC': 1, '_id': 0}
+    results = find(collection=MAIN_COLLECTION, search=search, projection=cols)
+    data = json.dumps(list(results))
+    return data

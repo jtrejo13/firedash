@@ -11,6 +11,20 @@ DB_URI = (f'mongodb://trejo:{DB_PASSWORD}@ds333238.mlab.com:33238'
 DB_NAME = 'heroku_2c1mks3g'
 
 
+def find(collection, search={}, projection={}):
+    """ Find items in a given collection matching a search.
+
+    Returns
+    -------
+    List
+        List of items in the database.
+    """
+    client = MongoClient(DB_URI)
+    db = client[DB_NAME]
+
+    return db[collection].find(search, projection)
+
+
 def get_unique(collection, field, search={}):
     """ Get all unique items for a field in a given collection.
 
