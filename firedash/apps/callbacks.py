@@ -80,28 +80,47 @@ def clear_dropdowns(n_clicks, publication, cell_type, chemistry, electrolyte,
 
 
 @app.callback(
-    Output('vent_gas_temp', 'children'),
+    Output('selected_experiment', 'children'),
     [
         Input('vent_ref_pub', 'value'),
         Input('vent_cell_types', 'value'),
         Input('vent_cell_chemistry', 'value'),
         Input('vent_cell_electrolytes', 'value'),
         Input('vent_cell_soc', 'value')
-    ])
-def update_gases(publication, cell_type, chemistry, electrolyte, soc):
+    ],
+    [State('selected_experiment', 'children')])
+def update_selected_experiment(publication, cell_type, chemistry,
+                               electrolyte, soc, current_experiment):
+    """ Update search experiment data based dropdown selections. """
+    if all([publication, cell_type, chemistry, electrolyte, soc]):
+        dct = {'Publication': publication, 'Format': cell_type,
+               'Chemistry': chemistry, 'Electrolyte': electrolyte, 'SOC': soc}
+        search = json.dumps(dct)
+    elif any([publication, cell_type, chemistry, electrolyte, soc]):
+        search = current_experiment
+    else:
+        search = None
+
+    return search
+
+
+@app.callback(
+    Output('gas_composition', 'children'),
+    [Input('selected_experiment', 'children')])
+def update_gases(selected_experiment):
     """ Update gas data based on dropdown selections. """
-    search = {'Publication': publication, 'Format': cell_type,
-              'Chemistry': chemistry, 'Electrolyte': electrolyte, 'SOC': soc}
-    _clean_search_dict(search)
-    search = _add_search_filter(search)
-    values = get_unique(MAIN_COLLECTION, field='Gases', search=search)
-    gases = values[-1] if values else ''
-    return json.dumps(gases)
+    if selected_experiment:
+        search = json.loads(selected_experiment)
+        _clean_search_dict(search)
+        search = _add_search_filter(search)
+        values = get_unique(MAIN_COLLECTION, field='Gases', search=search)
+        gases = values[-1] if values else ''
+        return json.dumps(gases)
 
 
 @app.callback(
     Output("composition_plot", "figure"),
-    [Input("vent_gas_temp", "children")],
+    [Input("gas_composition", "children")],
 )
 def make_gas_composition_plot(gases):
     """ Create gas composition plot. """
