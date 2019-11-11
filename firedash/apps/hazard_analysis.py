@@ -5,6 +5,7 @@ import json
 
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output
 import numpy as np
 from plotly.figure_factory import create_ternary_contour
@@ -77,9 +78,14 @@ layout = html.Div(
                 ),
                 html.Div(
                     [
-                        dcc.Graph(id='main_plot')
+                        dash_table.DataTable(
+                            id='table',
+                            columns=[{'name': 'Hello', 'id': 'Hello'},
+                                     {'name': 'Hi', 'id': 'Hi'}],
+                            data=[{'Hello': 'Juan', 'Hi': 'Trejo'}]
+                        )
                     ],
-                    id="explosionGraphContainer",
+                    id="summary_table",
                     className="pretty_container eight columns"
                 )
             ],
