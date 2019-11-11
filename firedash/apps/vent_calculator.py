@@ -128,7 +128,8 @@ layout = html.Div(
         ),
         html.Div(
             [
-                html.Div(id='vent_gas_temp', style={'display': 'none'}),
+                html.Div(id='selected_experiment', style={'display': 'none'}),
+                html.Div(id='gas_composition', style={'display': 'none'}),
                 html.Div(
                     [
                         dcc.Graph(id='composition_plot')
@@ -157,7 +158,7 @@ layout = html.Div(
 @app.callback(
     Output("explosion_plot", "figure"),
     [
-        Input("vent_gas_temp", "children"),
+        Input("gas_composition", "children"),
         Input("vent_room_rad", "value"),
         Input("vent_area", "value"),
         Input("vent_drag", "value"),
