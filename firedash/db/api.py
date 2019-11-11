@@ -11,7 +11,7 @@ DB_URI = (f'mongodb://trejo:{DB_PASSWORD}@ds333238.mlab.com:33238'
 DB_NAME = 'heroku_2c1mks3g'
 
 
-def find(collection, search={}, projection={}):
+def find(collection, search={}, projection=None):
     """ Find items in a given collection matching a search.
 
     Returns

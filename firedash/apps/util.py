@@ -9,8 +9,16 @@ CANTERA_GASES = ['CO2', 'CO', 'H2', 'CH4', 'C2H4', 'C2H6', 'C3H8', 'N2', 'O2',
                  'CH3OH']
 # Air composition
 AIR_SPECIES = {'O2': 1, 'N2': 3.76}
-# Main collection name
+
+
+# Ternary graph options
+TERNARY_OPTIONS = [{'label': 'Adiabatic Temperature', 'value': 'Tad'},
+                   {'label': 'Equivalence Ratio', 'value': 'phi'},
+                   {'label': 'Flammability', 'value': 'Flammable'}]
+
+# Collection Names
 MAIN_COLLECTION = 'main'
+FLAMMABILITY_COLLECTION = 'flammability'
 
 
 def _clean_search_dict(search):
@@ -63,3 +71,26 @@ def get_main_data():
     results = find(collection=MAIN_COLLECTION, search=search, projection=cols)
     data = json.dumps(list(results))
     return data
+
+
+def get_flammability_data(experiment):
+    """ Get flammability data for a selected experiment. """
+    id = make_unique_id(experiment)
+    results = list(find(collection=FLAMMABILITY_COLLECTION,
+                        search={'_id': id}))
+    data = json.dumps(results[0])
+    return data
+
+
+def make_unique_id(experiment):
+    """ Make id from selected experiment. """
+    experiment.pop('Electrolyte')
+
+    id = []
+    for value in experiment.values():
+        value = str(value)
+        value = value.lower()
+        value = value.replace(',', '')
+        id.append('_'.join(value.split()))
+
+    return '-'.join(id)
