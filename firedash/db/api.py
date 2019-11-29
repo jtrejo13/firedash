@@ -14,10 +14,19 @@ DB_NAME = 'heroku_2c1mks3g'
 def find(collection, search={}, projection=None):
     """ Find items in a given collection matching a search.
 
+    Parameters
+    ----------
+    collection : Unicode
+        Name of te collection to search in.
+    search : Dict
+        The search dictionary with the search parameters.
+    projection : Dict
+        projection dictionary to specify or restrict fields to return.
+
     Returns
     -------
     List
-        List of items in the database.
+        List of items in the collection.
     """
     client = MongoClient(DB_URI)
     db = client[DB_NAME]
@@ -26,12 +35,21 @@ def find(collection, search={}, projection=None):
 
 
 def get_unique(collection, field, search={}):
-    """ Get all unique items for a field in a given collection.
+    """ Get all unique values for a given field in a collection.
+
+    Parameters
+    ----------
+    collection : Unicode
+        Name of te collection to search in.
+    field : Unicode
+        Name of the field to retrieve.
+    search : Dict
+        The search dictionary with the search parameters.
 
     Returns
     -------
     List
-        List of unique fields in the database.
+        List of unique values for a given field in a collection.
     """
     client = MongoClient(DB_URI)
     db = client[DB_NAME]

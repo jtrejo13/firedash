@@ -32,6 +32,7 @@ layout = html.Div(
                     ],
                     id="logo",
                     className='one-third column',
+                    style={"textAlign": "left"}
                 ),
                 html.Div(
                     [

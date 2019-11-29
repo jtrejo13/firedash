@@ -5,6 +5,7 @@ import json
 
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output
 import numpy as np
 from plotly.figure_factory import create_ternary_contour
@@ -73,14 +74,45 @@ layout = html.Div(
                     [
                         dcc.Graph(id='composition_plot')
                     ],
-                    className='pretty_container four columns',
+                    className='pretty_container seven columns',
                 ),
                 html.Div(
                     [
-                        dcc.Graph(id='main_plot')
+                        dash_table.DataTable(
+                            id='table',
+                            columns=[{'name': 'Parameter', 'id': 'param'},
+                                     {'name': 'Value', 'id': 'value'}],
+                            data=[{'param': 'Laminar flame speed (m/s)'},
+                                  {'param': 'Upper Flammability Limit (%)'},
+                                  {'param': 'Lower Flammability Limit (%)'},
+                                  {'param': 'Max Adiabatic Pressure (bar)'}],
+                            style_as_list_view=True,
+                            style_cell={
+                                'font-family': ["Open Sans", "HelveticaNeue",
+                                                "Helvetica Neue", "Helvetica",
+                                                "Arial", "sans-serif"],
+                                'font-size': '18px',
+                                'textAlign': 'center',
+                                'height': '85px',
+                                'minWidth': '0px', 'maxWidth': '180px',
+                                'whiteSpace': 'normal'
+                            },
+                            style_cell_conditional=[{
+                                'if': {'column_id': 'param'},
+                                'textAlign': 'left'
+                            }],
+                            style_header_conditional=[{
+                                'if': {'column_id': 'param'},
+                                'textAlign': 'left'
+                            }],
+                            style_header={
+                                'fontWeight': 'bold',
+                                'textAlign': 'center'
+                            },
+                        )
                     ],
-                    id="explosionGraphContainer",
-                    className="pretty_container eight columns"
+                    id="summary_table",
+                    className="pretty_container five columns"
                 )
             ],
             className="row"
