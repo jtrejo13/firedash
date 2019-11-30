@@ -16,6 +16,16 @@ TERNARY_OPTIONS = [{'label': 'Adiabatic Temperature', 'value': 'Tad'},
                    {'label': 'Equivalence Ratio', 'value': 'phi'},
                    {'label': 'Flammability', 'value': 'Flammable'}]
 
+# x-axis options for summary plot
+X_AXIS_OPTIONS = [{'label': 'Equivalence Ratio', 'value': 'phi'},
+                  {'label': 'Fuel Ratio', 'value': 'Xf'}]
+
+# y-axis options for summary plot
+Y_AXIS_OPTIONS = [{'label': 'Equivalence Ratio', 'value': 'phi'},
+                  {'label': 'Laminar Flame Speed', 'value': 'Su'},
+                  {'label': 'Adiabatic Pressure', 'value': 'Pmax'},
+                  {'label': 'Adiabatic Temperature', 'value': 'Tad'}]
+
 # Collection Names
 MAIN_COLLECTION = 'main'
 FLAMMABILITY_COLLECTION = 'flammability'
@@ -78,19 +88,19 @@ def get_flammability_data(experiment):
     id = make_unique_id(experiment)
     results = list(find(collection=FLAMMABILITY_COLLECTION,
                         search={'_id': id}))
-    data = json.dumps(results[0])
-    return data
+    return results[0]
 
 
 def make_unique_id(experiment):
     """ Make id from selected experiment. """
     experiment.pop('Electrolyte')
+    experiment.pop('Format')
 
     id = []
     for value in experiment.values():
         value = str(value)
         value = value.lower()
         value = value.replace(',', '')
-        id.append('_'.join(value.split()))
+        id.append('-'.join(value.split()))
 
     return '-'.join(id)
