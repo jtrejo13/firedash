@@ -8,13 +8,16 @@ import dash_html_components as html
 import dash_table
 from dash.dependencies import Input, Output
 import numpy as np
+import pandas as pd
 from plotly.figure_factory import create_ternary_contour
 
 from app import app
 from .callbacks import *  # noqa
 from .controls import plot_layout
 from .layouts import main_dropdowns
-from .util import get_flammability_data, TERNARY_OPTIONS
+from .util import (
+    get_flammability_data, TERNARY_OPTIONS, X_AXIS_OPTIONS, Y_AXIS_OPTIONS
+)
 
 
 # Create app layout
@@ -79,13 +82,10 @@ layout = html.Div(
                 html.Div(
                     [
                         dash_table.DataTable(
-                            id='table',
+                            id='summary_table',
                             columns=[{'name': 'Parameter', 'id': 'param'},
                                      {'name': 'Value', 'id': 'value'}],
-                            data=[{'param': 'Laminar flame speed (m/s)'},
-                                  {'param': 'Upper Flammability Limit (%)'},
-                                  {'param': 'Lower Flammability Limit (%)'},
-                                  {'param': 'Max Adiabatic Pressure (bar)'}],
+                            data=[],
                             style_as_list_view=True,
                             style_cell={
                                 'font-family': ["Open Sans", "HelveticaNeue",
@@ -111,7 +111,7 @@ layout = html.Div(
                             },
                         )
                     ],
-                    id="summary_table",
+                    id="table_div",
                     className="pretty_container five columns"
                 )
             ],
@@ -121,7 +121,39 @@ layout = html.Div(
             [
                 html.Div(
                     [
-                        dcc.Graph(id='pie_graph')
+                        html.Div(
+                            [
+                                html.Label(
+                                    [
+                                        'y-axis:',
+                                        dcc.Dropdown(
+                                            id='y_axis',
+                                            options=Y_AXIS_OPTIONS,
+                                            placeholder='Change y-axis:',
+                                            style={'width': '80%',
+                                                   'padding-left': '10px'},
+                                        ),
+                                    ],
+                                    className="control_label row",
+                                ),
+                                html.Label(
+                                    [
+                                        'x-axis:',
+                                        dcc.Dropdown(
+                                            id='x_axis',
+                                            options=X_AXIS_OPTIONS,
+                                            placeholder='Change x-axis:',
+                                            style={'width': '80%',
+                                                   'padding-left': '10px'},
+                                        ),
+                                    ],
+                                    className="control_label row",
+                                ),
+                            ],
+                            className="row",
+                            style={'padding-bottom': '10px'}
+                        ),
+                        dcc.Graph(id='summary_graph')
                     ],
                     className='pretty_container seven columns',
                 ),
@@ -129,10 +161,10 @@ layout = html.Div(
                     [
                         html.Label(
                             [
-                                'Select variable to plot:',
                                 dcc.Dropdown(
                                     id='ternary_dropdown',
                                     options=TERNARY_OPTIONS,
+                                    placeholder='Select plot',
                                     style={'width': '60%'},
                                 ),
                             ],
@@ -163,7 +195,84 @@ def update_flammability_data(experiment):
     if experiment:
         data = get_flammability_data(json.loads(experiment))
 
+    return json.dumps(data)
+
+
+@app.callback(
+    Output('summary_table', 'data'),
+    [Input('flammability_data', 'children')])
+def update_summary_table(flammability_data):
+    """ Update summary table based on selected experiment. """
+    data = [{'param': 'Lower Flammability Limit', 'value': '%'},
+            {'param': 'Upper Flammability Limit', 'value': '%'},
+            {'param': 'Laminar Flame Speed', 'value': 'm/s'},
+            {'param': 'Max Adiabatic Pressure', 'value': 'bar'}]
+
+    flammability_data = json.loads(flammability_data)
+
+    if flammability_data is not None:
+        flammability_data.pop('_id')
+        df = pd.DataFrame.from_dict(flammability_data,
+                                    orient='index').transpose()
+
+        ufl = max(df[(df.Xi == 0) & (df.Flammable == 1)].Xf) * 100
+        lfl = min(df[(df.Xi == 0) & (df.Flammable == 1)].Xf) * 100
+        su = max(df.Su)
+        p_max = max(df.Pmax)
+
+        data = [{'param': 'Lower Flammability Limit',
+                 'value': '{0:.2f} %'.format(lfl)},
+                {'param': 'Upper Flammability Limit',
+                 'value': '{0:.2f} %'.format(ufl)},
+                {'param': 'Laminar Flame Speed',
+                 'value': '{0:.2f} m/s'.format(su)},
+                {'param': 'Max Adiabatic Pressure',
+                 'value': '{0:.2f} bar'.format(p_max)}]
+
     return data
+
+
+@app.callback(
+    Output('summary_graph', 'figure'),
+    [
+        Input('flammability_data', 'children'),
+        Input('x_axis', 'value'),
+        Input('y_axis', 'value'),
+        Input('x_axis', 'label'),
+        Input('y_axis', 'label'),
+    ])
+def make_summary_plot(flammability_data, x_axis, y_axis, x_label, y_label):
+    data = []
+    x_axis = x_axis or 'phi'
+    y_axis = y_axis or 'Su'
+    x_label = x_label or 'Equivalence Ratio'
+    y_label = y_label or 'Laminar Flame Speed'
+
+    flammability_data = json.loads(flammability_data)
+
+    if flammability_data is not None:
+        flammability_data.pop('_id')
+        df = pd.DataFrame.from_dict(flammability_data,
+                                    orient='index').transpose()
+        x_data = list(df[(df.Xi == 0) & (df.Flammable == 1)][x_axis])
+        y_data = list(df[(df.Xi == 0) & (df.Flammable == 1)][y_axis])
+
+        data = [
+            dict(
+                type="scatter",
+                mode="lines+markers",
+                x=x_data,
+                y=y_data
+            )
+        ]
+
+    layout = copy.deepcopy(plot_layout)
+    layout['title'] = f'{y_label} vs. {x_label}'
+    layout['xaxis'] = dict(title={'text': x_label})
+    layout['yaxis'] = dict(title={'text': y_label})
+
+    figure = dict(data=data, layout=layout)
+    return figure
 
 
 @app.callback(
