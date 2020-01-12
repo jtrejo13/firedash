@@ -92,7 +92,7 @@ def clear_dropdowns(n_clicks, publication, cell_type, chemistry, electrolyte,
 def update_selected_experiment(publication, cell_type, chemistry,
                                electrolyte, soc, current_experiment):
     """ Update search experiment data based dropdown selections. """
-    if all([publication, cell_type, chemistry, electrolyte, soc]):
+    if all([publication, cell_type, chemistry, soc]):
         dct = {'Publication': publication, 'Format': cell_type,
                'Chemistry': chemistry, 'Electrolyte': electrolyte, 'SOC': soc}
         search = json.dumps(dct)
